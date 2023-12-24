@@ -3,5 +3,6 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="container_color">#F5F5F5</color>
+    <color name="orange_color">#ff6819</color>
 
 </resources>

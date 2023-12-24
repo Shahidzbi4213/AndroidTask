@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Android Task</string>
+    <string name="app_name">JanBark Task</string>
     <string name="notification">Screenshort taken Service</string>
     <string name="loadingAds">Loading Ads</string>
     <string name="loadingAdswithdots">Loading ad...</string>
