@@ -1,8 +1,6 @@
 package com.gulehri.androidtask.utils
 
 import android.Manifest
-import android.app.Activity
-import android.content.Context
 import android.os.Build
 import com.gulehri.androidtask.ui.MainActivity
 import com.permissionx.guolindev.PermissionX
