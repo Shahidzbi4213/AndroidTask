@@ -6,25 +6,34 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
-import com.gulehri.androidtask.Interfaces.ScreenshotClicks
 import com.gulehri.androidtask.R
-import com.gulehri.androidtask.adapters.ScreenshotsAdapter
+import com.gulehri.androidtask.ads.InterstitialHelper
+import com.gulehri.androidtask.ads.NativeHelper
+import com.gulehri.androidtask.ui.adapters.ScreenshotsAdapter
 import com.gulehri.androidtask.databinding.FragmentMainBinding
+import com.gulehri.androidtask.utils.Extensions
+import com.gulehri.androidtask.model.Image
+import com.gulehri.androidtask.ui.vm.ImageViewModel
 import com.gulehri.androidtask.utils.Extensions.debug
-import com.gulehri.androidtask.utils.Image
-import com.gulehri.androidtask.utils.ImageViewModel
 
-class MainFragment : Fragment(),ScreenshotClicks {
+class MainFragment : Fragment() {
 
     private var _binding: FragmentMainBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var adapter:ScreenshotsAdapter
-    private lateinit var imageViewModel: ImageViewModel
+    private var _adapter: ScreenshotsAdapter? = null
+    val adapter get() = _adapter!!
+
+
+    private val imageViewModel by viewModels<ImageViewModel>()
+
+    private var _nativeHelper: NativeHelper? = null
+    private val nativeHelper get() = _nativeHelper!!
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -32,22 +41,36 @@ class MainFragment : Fragment(),ScreenshotClicks {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentMainBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
         setupRecyclerView()
         loadImages()
+
+
+        _nativeHelper = NativeHelper(view.context)
+
+        //PreLoadInterAd
+        if (Extensions.isNetworkAvailable(view.context))
+            activity?.let { InterstitialHelper.loadInterAd(it) }
+
+        if (Extensions.isNetworkAvailable(view.context))
+            nativeHelper.preLoadNative()
 
         binding.swipeRefreshLayout.setOnRefreshListener {
             loadImages()
         }
-        return binding.root
     }
 
     private fun loadImages() {
-        imageViewModel = ViewModelProvider(this)[ImageViewModel::class.java]
 
         // Observe the LiveData
         imageViewModel.imageList.observe(viewLifecycleOwner) { images ->
             for (image in images) {
-                image.debug()
                 adapter.updateData(images.toMutableList())
             }
             binding.swipeRefreshLayout.isRefreshing = false
@@ -58,7 +81,7 @@ class MainFragment : Fragment(),ScreenshotClicks {
 
     private fun setupRecyclerView() {
 
-        adapter = ScreenshotsAdapter()
+        _adapter = ScreenshotsAdapter(::menuClick)
         binding.recView.adapter = adapter
         val layoutManager = GridLayoutManager(requireContext(), 3)
         layoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
@@ -71,29 +94,35 @@ class MainFragment : Fragment(),ScreenshotClicks {
             }
         }
         binding.recView.layoutManager = layoutManager
-        adapter.screenshotClicks = this
 
     }
 
 
-    override fun menuClick(position: Int, anchorView: View) {
+    private fun menuClick(image: Image, anchorView: View) {
         val popupMenu = PopupMenu(requireContext(), anchorView)
         popupMenu.inflate(R.menu.menu)
 
         popupMenu.setOnMenuItemClickListener { item: MenuItem ->
             when (item.itemId) {
                 R.id.menu_open -> {
-                    // Handle open action
+
+                    navigateToNext(image)
                     true
                 }
+
                 R.id.menu_share -> {
-                    // Handle share action
+                    activity?.let {
+                        Extensions.shareImage(it, image.path)
+                    }
+
                     true
                 }
+
                 R.id.menu_delete -> {
-                    // Handle delete action
+                    imageViewModel.deleteFile(image.path)
                     true
                 }
+
                 else -> false
             }
         }
@@ -101,9 +130,28 @@ class MainFragment : Fragment(),ScreenshotClicks {
         popupMenu.show()
     }
 
+    private fun navigateToNext(image: Image) {
+
+        activity?.let {
+            InterstitialHelper.showAndLoadInterAd(it, true) {
+                if (findNavController().currentDestination?.id == R.id.mainFragment) {
+
+                    findNavController().navigate(
+                        R.id.action_mainFragment_to_detailFragment,
+                        bundleOf("image" to image)
+                    )
+                }
+            }
+
+        }
+    }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
+
+        _nativeHelper = null
+        _adapter = null
         _binding = null
     }
 }

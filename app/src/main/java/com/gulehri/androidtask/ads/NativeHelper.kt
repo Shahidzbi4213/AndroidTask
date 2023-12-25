@@ -51,6 +51,44 @@ class NativeHelper(private val context: Context) {
     }
 
 
+    fun preLoadNative() {
+        if (!isNativeLoading) {
+
+            isNativeLoading = true
+            if (adMobNativeAd == null) {
+                val builder: AdLoader.Builder =
+                    AdLoader.Builder(
+                        context.applicationContext,
+                        context.getString(R.string.natives)
+                    )
+                val adLoader = builder.forNativeAd { unifiedNativeAd: NativeAd? ->
+                    adMobNativeAd = unifiedNativeAd
+                }.withAdListener(object : AdListener() {
+                    override fun onAdFailedToLoad(i: LoadAdError) {
+                        super.onAdFailedToLoad(i)
+                        isNativeLoading = false
+                        Extensions.infoLog(
+                            TAG,
+                            "Failed; code: " + i.code + ", message: " + i.message
+                        )
+                    }
+
+                    override fun onAdLoaded() {
+                        super.onAdLoaded()
+                        isNativeLoading = false
+                        Extensions.infoLog(TAG, "Loaded")
+                    }
+                }).withNativeAdOptions(
+                    com.google.android.gms.ads.nativead.NativeAdOptions.Builder()
+                        .setAdChoicesPlacement(com.google.android.gms.ads.formats.NativeAdOptions.ADCHOICES_TOP_RIGHT)
+                        .build()
+                ).build()
+                adLoader.loadAd(AdRequest.Builder().build())
+            }
+        }
+    }
+
+
     private fun showNative(
         nativeContainer: ConstraintLayout,
         adMobContainer: FrameLayout,

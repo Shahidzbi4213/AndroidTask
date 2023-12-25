@@ -1,15 +1,19 @@
 package com.gulehri.androidtask.utils
 
+import android.app.Activity
 import android.app.ActivityManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Environment
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.core.content.FileProvider
 import com.gulehri.androidtask.R
 import java.io.File
 
@@ -77,7 +81,9 @@ object Extensions {
     }
 
     fun appDirectory(): String {
-        val myDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString() + File.separator + "Android Task"
+        val myDirectory =
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+                .toString() + File.separator + "Android Task"
         val myDir = File(myDirectory)
         if (!myDir.exists()) {
             try {
@@ -90,4 +96,23 @@ object Extensions {
     }
 
 
+    fun shareImage(context: Activity, path: String?) {
+        path?.let {
+            val contentUri =
+                FileProvider.getUriForFile(context, context.packageName + ".provider", File(path))
+            if (contentUri != null) {
+                Intent().also {
+                    it.action = Intent.ACTION_SEND
+                    it.putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.app_name))
+                    it.putExtra(Intent.EXTRA_TEXT, context.getString(R.string.follow_for_more))
+                    it.type = "image/*"
+                    it.putExtra(Intent.EXTRA_STREAM, contentUri)
+                    it.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+                }.also {
+                    context.startActivity(it)
+                }
+            }
+        } ?: Toast.makeText(context, R.string.something_went_wrong, Toast.LENGTH_SHORT).show()
+
+    }
 }

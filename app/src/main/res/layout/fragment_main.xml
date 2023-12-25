@@ -6,14 +6,18 @@
     android:layout_height="match_parent"
     tools:context=".ui.MainFragment">
 
-    <include
+
+    <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/layoutToolBar"
-        layout="@layout/tool_bar"
         android:layout_width="match_parent"
-        android:layout_height="?actionBarSize"
+        android:layout_height="?attr/actionBarSize"
+        android:background="#3F51B5"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:title="@string/app_name"
+        app:titleTextColor="@color/white" />
+
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/noDataPlaceHolder"
@@ -54,7 +58,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/noDataPlaceHolder"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/layoutToolBar">
+        app:layout_constraintTop_toBottomOf="@id/layoutToolBar">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recView"
@@ -64,9 +68,6 @@
             app:spanCount="3"
             tools:listitem="@layout/single_image" />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-
-
-
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -85,7 +85,7 @@ object InterstitialHelper {
     ) {
 
 
-        if (!isAdLoading && isTimeOfNextInterAd() && mInterstitialAd != null
+        if (!isAdLoading /*&& isTimeOfNextInterAd()*/ && mInterstitialAd != null
             && Extensions.isNetworkAvailable(activity) && !MainActivity.isActivityPause
         ) {
 
@@ -159,7 +159,7 @@ object InterstitialHelper {
             job.launch {
 
                 withContext(Dispatchers.IO) {
-                    delay(20.seconds)
+                    delay(5.seconds)
                 }
                 loadInterAd(activity, R.string.interstitial)
             }
