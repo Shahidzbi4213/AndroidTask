@@ -5,4 +5,7 @@ import kotlinx.parcelize.Parcelize
 
 
 @Parcelize
-data class Image(val path: String) : Parcelable
+data class Image(
+    val path: String,
+    val view_type: Int = 0
+) : Parcelable

@@ -1,6 +1,7 @@
 package com.gulehri.androidtask.ui
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -13,13 +14,13 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.gulehri.androidtask.R
 import com.gulehri.androidtask.ads.InterstitialHelper
-import com.gulehri.androidtask.ads.NativeHelper
 import com.gulehri.androidtask.ui.adapters.ScreenshotsAdapter
 import com.gulehri.androidtask.databinding.FragmentMainBinding
 import com.gulehri.androidtask.utils.Extensions
 import com.gulehri.androidtask.model.Image
 import com.gulehri.androidtask.ui.vm.ImageViewModel
-import com.gulehri.androidtask.utils.Extensions.debug
+import com.gulehri.androidtask.utils.Extensions.hide
+import com.gulehri.androidtask.utils.Extensions.show
 
 class MainFragment : Fragment() {
 
@@ -32,8 +33,6 @@ class MainFragment : Fragment() {
 
     private val imageViewModel by viewModels<ImageViewModel>()
 
-    private var _nativeHelper: NativeHelper? = null
-    private val nativeHelper get() = _nativeHelper!!
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -52,14 +51,10 @@ class MainFragment : Fragment() {
         loadImages()
 
 
-        _nativeHelper = NativeHelper(view.context)
-
         //PreLoadInterAd
         if (Extensions.isNetworkAvailable(view.context))
             activity?.let { InterstitialHelper.loadInterAd(it) }
 
-        if (Extensions.isNetworkAvailable(view.context))
-            nativeHelper.preLoadNative()
 
         binding.swipeRefreshLayout.setOnRefreshListener {
             loadImages()
@@ -70,19 +65,36 @@ class MainFragment : Fragment() {
 
         // Observe the LiveData
         imageViewModel.imageList.observe(viewLifecycleOwner) { images ->
-            for (image in images) {
-                adapter.updateData(images.toMutableList())
+            val updatedImageList = mutableListOf<Image>()
+
+            for ((index, image) in images.withIndex()) {
+                updatedImageList.add(image)
+
+                // Add an ad item after every 6 images
+                if ((index + 1) % 6 == 0 && index + 1 < images.size) {
+                    val adItem = Image(path = "ad", view_type = 1) // Assuming view_type 1 is for ad items
+                    updatedImageList.add(adItem)
+                }
             }
+
+            Log.d("loadImages", "$updatedImageList")
+
+            adapter.updateData(updatedImageList)
+
             binding.swipeRefreshLayout.isRefreshing = false
+
+            if (updatedImageList.isEmpty()) {
+                binding.noDataPlaceHolder.show()
+            } else {
+                binding.noDataPlaceHolder.hide()
+            }
         }
 
         imageViewModel.loadImages()
     }
 
-    private fun setupRecyclerView() {
 
-        _adapter = ScreenshotsAdapter(::menuClick)
-        binding.recView.adapter = adapter
+    private fun setupRecyclerView() {
         val layoutManager = GridLayoutManager(requireContext(), 3)
         layoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
             override fun getSpanSize(position: Int): Int {
@@ -94,9 +106,10 @@ class MainFragment : Fragment() {
             }
         }
         binding.recView.layoutManager = layoutManager
+        _adapter = ScreenshotsAdapter(requireContext(),::menuClick)
+        binding.recView.adapter = adapter
 
     }
-
 
     private fun menuClick(image: Image, anchorView: View) {
         val popupMenu = PopupMenu(requireContext(), anchorView)
@@ -150,7 +163,6 @@ class MainFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
 
-        _nativeHelper = null
         _adapter = null
         _binding = null
     }

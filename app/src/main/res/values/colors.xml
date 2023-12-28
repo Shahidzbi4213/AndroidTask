@@ -4,5 +4,6 @@
     <color name="white">#FFFFFFFF</color>
     <color name="container_color">#F5F5F5</color>
     <color name="orange_color">#ff6819</color>
+    <color name="gray">@android:color/darker_gray</color>
 
 </resources>

@@ -83,7 +83,7 @@ object Extensions {
     fun appDirectory(): String {
         val myDirectory =
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-                .toString() + File.separator + "Android Task"
+                .toString() + File.separator + "Shah Saud Task"
         val myDir = File(myDirectory)
         if (!myDir.exists()) {
             try {

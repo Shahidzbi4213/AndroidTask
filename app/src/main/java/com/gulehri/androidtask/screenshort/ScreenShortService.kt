@@ -6,7 +6,7 @@ import android.os.IBinder
 import android.widget.Toast
 
 /*
- * Created by Shahid Iqbal on 12/23/2023.
+ * Created by Shah Saud on 12/24/2023.
  */
 
 class ScreenShortService : Service() {

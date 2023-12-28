@@ -27,7 +27,7 @@ android {
             .map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
             .forEach { output ->
                 val outputFileName =
-                    "Android Task ${this.baseName} - ${this.versionName} - ${this.versionCode}.apk"
+                    "Shahsaud Task ${this.baseName} - ${this.versionName} - ${this.versionCode}.apk"
                 output.outputFileName = outputFileName
             }
     }
@@ -105,6 +105,9 @@ dependencies {
 
     //Swipe Refresh
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.2.0-alpha01")
+
+    //shimmer
+    api("com.facebook.shimmer:shimmer:0.5.0")
 
 
 

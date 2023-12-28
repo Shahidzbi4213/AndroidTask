@@ -1,5 +1,8 @@
 package com.gulehri.androidtask.ui.adapters
 
+import android.content.Context
+import android.provider.Settings.Global.getString
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -7,21 +10,21 @@ import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import coil.transform.RoundedCornersTransformation
 import com.gulehri.androidtask.R
-import com.gulehri.androidtask.ads.NativeHelper
+import com.gulehri.androidtask.ads.ExtraSmallNativeAdsHelper
 import com.gulehri.androidtask.databinding.NativeAdsContainerBinding
 import com.gulehri.androidtask.databinding.SingleImageBinding
 import com.gulehri.androidtask.model.Image
-import com.gulehri.androidtask.utils.Extensions.hide
-import com.gulehri.androidtask.utils.Extensions.show
 
-class ScreenshotsAdapter(private val onItemClick: (Image, View) -> Unit) :
+class ScreenshotsAdapter(private val context: Context, private val onItemClick: (Image, View) -> Unit) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private var itemList: MutableList<Image> = mutableListOf()
 
-    companion object {
-        const val VIEW_TYPE_IMAGE = 0
-        const val VIEW_TYPE_AD = 1
-    }
+
+      companion object{
+          const val VIEW_TYPE_IMAGE = 0
+          const val VIEW_TYPE_AD = 1
+      }
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
@@ -41,16 +44,15 @@ class ScreenshotsAdapter(private val onItemClick: (Image, View) -> Unit) :
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        when (holder) {
-            is ImageViewHolder -> {
-
+        when(holder){
+            is ImageViewHolder ->{
                 holder.bind(image = itemList[position])
             }
-
-            is AdViewHolder -> {
+            is AdViewHolder ->{
                 holder.bind()
             }
         }
+
     }
 
     override fun getItemCount(): Int {
@@ -58,14 +60,16 @@ class ScreenshotsAdapter(private val onItemClick: (Image, View) -> Unit) :
     }
 
     override fun getItemViewType(position: Int): Int {
-        return if (position != 0 && position % 6 == 0) {
-            VIEW_TYPE_AD
-        } else {
-            VIEW_TYPE_IMAGE
-        }
+        Log.d("getItemViewType", "")
+        return itemList[position].view_type
+
+
     }
 
+
+
     fun updateData(newList: MutableList<Image>) {
+        itemList.clear()
         itemList = newList
         notifyDataSetChanged()
     }
@@ -79,7 +83,7 @@ class ScreenshotsAdapter(private val onItemClick: (Image, View) -> Unit) :
             //LoadReal Image
             // binding.img.load(image.path)
 
-            binding.img.load(R.drawable.cat) {
+            binding.img.load(image.path) {
                 transformations(RoundedCornersTransformation(10f))
             }
 
@@ -93,20 +97,22 @@ class ScreenshotsAdapter(private val onItemClick: (Image, View) -> Unit) :
     class AdViewHolder(private val binding: NativeAdsContainerBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind() {
-            if (NativeHelper.adMobNativeAd != null) {
 
-                val nativeHelper = NativeHelper(binding.root.context)
-                nativeHelper.populateUnifiedNativeAdView(
-                    NativeHelper.adMobNativeAd,
-                    binding.nativeContainer,
-                    binding.adPlaceHolder, 450
-                ) {}
+            ExtraSmallNativeAdsHelper(binding.root.context).setNativeAdSmall(
+                binding.nativeAdIncludeSmall.splashShimmer,
+                binding.nativeAdIncludeSmall.adFrame,
+                R.layout.extra_small_native,
+            )
+//                val nativeHelper = NativeHelper(binding.root.context)
+//                nativeHelper.populateUnifiedNativeAdView(
+//                    NativeHelper.adMobNativeAd,
+//                    binding.nativeContainer,
+//                    binding.adPlaceHolder, 110
+//                ) {}
+//
+//                binding.nativeContainer.show()
 
-                binding.nativeContainer.show()
 
-            } /*else {
-                binding.root.hide()
-            }*/
         }
     }
 

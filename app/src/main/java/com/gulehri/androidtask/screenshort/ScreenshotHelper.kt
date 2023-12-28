@@ -5,11 +5,13 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.hardware.display.DisplayManager
 import android.media.ImageReader
+import android.media.MediaPlayer
 import android.media.MediaScannerConnection
 import android.media.projection.MediaProjectionManager
 import android.util.DisplayMetrics
 import android.view.WindowManager
 import android.widget.Toast
+import com.gulehri.androidtask.R
 import com.gulehri.androidtask.utils.Extensions
 import com.gulehri.androidtask.utils.Extensions.debug
 import kotlinx.coroutines.CoroutineScope
@@ -119,8 +121,24 @@ class ScreenshotHelper(private val context: Context) {
             }
         }.onSuccess {
             MediaScannerConnection.scanFile(context, arrayOf(myPath.absolutePath), null) { _, _ -> }
+            playSaveSound()
             Toast.makeText(context, "Image Saved", Toast.LENGTH_SHORT).show()
         }
     }
+
+    private fun playSaveSound() {
+        try {
+            val mediaPlayer = MediaPlayer.create(context, R.raw.camera)
+
+            mediaPlayer.setOnCompletionListener {
+                it.release()
+            }
+
+            mediaPlayer.start()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
 
 }

@@ -10,19 +10,8 @@ import com.gulehri.androidtask.ads.InterstitialHelper
 import com.gulehri.androidtask.databinding.ActivityMainBinding
 import com.gulehri.androidtask.screenshort.Actions
 import com.gulehri.androidtask.screenshort.ScreenShortService
-import com.gulehri.androidtask.utils.Extensions.debug
 import com.gulehri.androidtask.utils.Extensions.isMyServiceRunning
 import com.gulehri.androidtask.utils.PermissionUtils
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.io.File
-import java.io.FileNotFoundException
-import java.io.FileOutputStream
-import java.io.IOException
-import java.text.SimpleDateFormat
-import kotlin.time.Duration.Companion.seconds
 
 class MainActivity : AppCompatActivity() {
 
@@ -44,34 +33,33 @@ class MainActivity : AppCompatActivity() {
 
 
         // Request permission to capture the screen
+        if (!this.isMyServiceRunning(ScreenShortService::class.java)) {
         startActivityForResult(
             mediaProjectionManager.createScreenCaptureIntent(),
             77
         )
+            }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-
-
-
         if (resultCode == Activity.RESULT_OK) {
-
             PermissionUtils.checkAndRequestPermissions(this) {
                 if (data != null) {
-                    startScreenShortService(resultCode, data)
+                        startScreenShortService(resultCode, data)
                 }
             }
         }
     }
 
     private fun startScreenShortService(code: Int, data: Intent?) {
-        if (!this.isMyServiceRunning(ScreenShortService::class.java))
+        if (!this.isMyServiceRunning(ScreenShortService::class.java)) {
             startService(Intent(this, ScreenShortService::class.java).apply {
                 action = Actions.START.toString()
                 putExtra("code", code)
                 putExtra("data", data)
             })
+        }
     }
 
 

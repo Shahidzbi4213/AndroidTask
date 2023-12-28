@@ -5,7 +5,6 @@ import android.app.Notification
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import androidx.browser.browseractions.BrowserActionsIntent.launchIntent
 import androidx.core.app.NotificationCompat
 import com.gulehri.androidtask.R
 import com.gulehri.androidtask.utils.CHANNEL_ID
